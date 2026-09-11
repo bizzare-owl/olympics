@@ -9,55 +9,75 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
-
-    public static record Tag(String name, boolean opening) {
-
-    }
-
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        Scanner scanner = new Scanner(reader);
-        String xml = scanner.nextLine();
-        List<Tag> tags = new ArrayList<>();
-
+        String xml = reader.readLine();
+        char[] chars = xml.toCharArray();
+        String validChars = "abcdefghijklmnopqrstuvwxyz<>/";
+        boolean validFlag = false;
         for (int i = 0; i < xml.length(); i++) {
-            if (xml.charAt(i) == '<') {
-                boolean isOpening = xml.charAt(i + 1) != '/';
-                int index = isOpening ? i + 1 : i + 2;
-                while (xml.charAt(index) != '>') {
-                    index++;
-                }
-                String name = xml.substring(isOpening ? i + 1 : i + 2, index);
-                tags.add(new Tag(name, isOpening));
+            if (validFlag) {
+                break;
             }
-        }
 
-        Deque<Tag> stack = new LinkedList<>();
-        for (int i = 0; i < tags.size(); i++) {
-            if (tags.get(i).opening()) {
-                stack.addFirst(tags.get(i));
-            } else {
-                Tag current = tags.get(i);
-                Tag top = stack.getFirst();
-                if (top.name.equals(current.name)) {
-                    stack.pollFirst();
-                } else {
-                    int position = 0;
-                    while (!stack.isEmpty()) {
-                        stack.pollFirst();
-                        position++;
-                    }
-                    tags.set(position, new Tag(current.name, true));
+            for (int j = 0; j < validChars.length(); j++) {
+                char toReplace = validChars.charAt(j);
+                char replaced = chars[i];
+                chars[i] = toReplace;
+                validFlag = isValidXml(new String(chars));
+                if (validFlag) {
                     break;
                 }
+                chars[i] = replaced;
             }
         }
 
-        System.out.println(tags.stream().map(t -> t.opening() ? "<" + t.name + ">" : "</" + t.name + ">").collect(Collectors.joining()));
+        System.out.println(new String(chars));
 
         reader.close();
         writer.close();
     }
+
+    public static boolean isValidXml(String xml) {
+        int position = 0;
+        Deque<String> stack = new LinkedList<>();
+        while (position < xml.length()) {
+            if (xml.charAt(position) != '<') {
+                return false;
+            }
+
+            position++;
+            boolean isOpening = true;
+            if (xml.charAt(position) == '/') {
+                position++;
+                isOpening = false;
+            }
+
+            StringBuilder name = new StringBuilder();
+            while (position < xml.length() && Character.isAlphabetic(xml.charAt(position))) {
+                name.append(xml.charAt(position));
+                position++;
+            }
+
+            if (name.isEmpty() || position >= xml.length() || xml.charAt(position) != '>') {
+                return false;
+            }
+
+            if (!isOpening) {
+                if (stack.isEmpty() || !stack.peekFirst().equals(name.toString())) {
+                    return false;
+                }
+                stack.pollFirst();
+            } else {
+                stack.addFirst(name.toString());
+            }
+            position++;
+
+        }
+
+        return stack.isEmpty();
+    }
+
 }

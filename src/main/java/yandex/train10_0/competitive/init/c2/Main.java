@@ -1,4 +1,4 @@
-package yandex.train10_0.competitive.c2;
+package yandex.train10_0.competitive.init.c2;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
