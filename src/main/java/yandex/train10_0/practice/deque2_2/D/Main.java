@@ -15,7 +15,7 @@ public class Main {
             teams.addLast(scanner.nextInt());
         }
 
-        int q = scanner.nextInt();
+        int q = scanner.nextInt(); // test
         Queue<Integer> k = new PriorityQueue<>();
         HashMap<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < q; i++) {
