@@ -8,79 +8,46 @@ public class Main {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("file.txt")));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
 
-
-        long start = System.currentTimeMillis();
-        int n = Integer.parseInt(reader.readLine());
-        Deque<Integer> teams = new ArrayDeque<>();
-        int max = 0;
-        String[] nums = reader.readLine().split(" ");
+        Scanner scanner = new Scanner(reader);
+        int n = scanner.nextInt();
+        int[] in = new int[n];
+        int[] pref = new int[n];
+        Deque<Integer> deque = new ArrayDeque<>();
+        int maxIndex = 0;
         for (int i = 0; i < n; i++) {
-            int v = Integer.parseInt(nums[i]);
-            if (max < v) {
-                max = v;
+            in[i] = scanner.nextInt();
+            deque.addFirst(in[i]);
+            if (in[maxIndex] < in[i]) {
+                maxIndex = i;
             }
-
-            teams.addFirst(v);
+            pref[i] = in[maxIndex];
         }
 
-        HashMap<Integer, Integer> ks = new HashMap<>();
-        Map<Integer, Integer> kMap = new HashMap<>();
-        Map<Integer, int[]> resultMap = new HashMap<>();
-        int q = Integer.parseInt(reader.readLine());
-        for (int i = 0; i < q; i++) {
-            int v = Integer.parseInt(reader.readLine());
-            if (ks.containsKey(v)) {
-                kMap.put(i, ks.get(v));
-                resultMap.put(ks.get(v), null);
-            } else {
-                Integer vv = v;
-                ks.put(vv, vv);
-                kMap.put(i, vv);
-                resultMap.put(vv, null);
-            }
-        }
-
-        int round = 1;
-        while (teams.peekLast() != max) {
-            int f = teams.pollLast();
-            int s = teams.pollLast();
-            if (resultMap.containsKey(round)) {
-                resultMap.put(round, new int[]{f, s});
-            }
+        for (int i = 0; i < maxIndex; i++) {
+            int f = deque.pollLast();
+            int s = deque.pollLast();
 
             if (f > s) {
-                teams.addLast(f);
-                teams.addFirst(s);
+                deque.addLast(f);
+                deque.addFirst(s);
             } else {
-                teams.addLast(s);
-                teams.addFirst(f);
-            }
-            round++;
-        }
-
-        List<Integer> ksSorted = new ArrayList<>();
-        for (Integer v : resultMap.keySet()) {
-            if (resultMap.get(v) == null) {
-                ksSorted.add(v);
+                deque.addLast(s);
+                deque.addFirst(f);
             }
         }
 
-        Collections.sort(ksSorted);
+        deque.pollLast();
+        Integer[] deq = deque.reversed().toArray(Integer[]::new);
 
-        int pivot = teams.pollLast();
-        List<Integer> teamsCycle = teams.reversed().stream().toList();
-        for (int k : ksSorted) {
-            resultMap.put(k,new int[]{pivot, teamsCycle.get((k - round) % teamsCycle.size())});
-        }
-
+        int q = scanner.nextInt();
         for (int i = 0; i < q; i++) {
-            int[] r = resultMap.get(kMap.get(i));
-            System.out.println(r[0] + " " + r[1]);
+            long k = scanner.nextLong();
+            if (k < maxIndex) {
+                System.out.println(pref[(int) k - 1] + " " + in[(int)k]);
+            } else {
+                System.out.println(in[maxIndex] + " " + deq[(int)((k - maxIndex - 1 + deq.length) % deq.length)]);
+            }
         }
-
-
-        long end = System.currentTimeMillis();
-        System.out.println("RESULT: " + (end - start));
 
 
         reader.close();

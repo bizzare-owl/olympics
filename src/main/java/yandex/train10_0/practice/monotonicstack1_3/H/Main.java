@@ -20,25 +20,22 @@ public class Main {
             h[i] = scanner.nextInt();
         }
 
-        Deque<Integer> stack = new LinkedList<>();
-        stack.push(-1);
-        int max = 0;
-        for (int i = 0; i < n; i++) {
-            while (stack.peek() != -1 && h[stack.peek()] > h[i]) {
-                int index = stack.pop();
-                int width = i - stack.peek() - 1;
-                max = Math.max(max, width * h[index]);
+        Deque<Integer> indices = new LinkedList<>();
+        Deque<Integer> pivots = new LinkedList<>();
+        long maxArea = 0;
+        for (int i = 0; i < h.length + 1; i++) {
+            int pivotIndex = i;
+            while (!indices.isEmpty() && i == h.length || !indices.isEmpty() && h[indices.getFirst()] > h[i]) {
+                int index = indices.pollFirst();
+                int pivot = pivots.pollFirst();
+                pivotIndex = pivot;
+                maxArea = Math.max(maxArea, (long) h[index] * (i - pivot));
             }
-            stack.addFirst(i);
+            indices.addFirst(i);
+            pivots.addFirst(pivotIndex);
         }
 
-        while (stack.peek() != -1) {
-            int index = stack.pollFirst();
-            int width = n - stack.peek() - 1;
-            max = Math.max(max, width * h[index]);
-        }
-
-        System.out.println(max);
+        System.out.println(maxArea);
 
         reader.close();
         writer.close();
