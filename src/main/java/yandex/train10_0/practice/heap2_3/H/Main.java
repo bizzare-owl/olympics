@@ -5,10 +5,18 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.PriorityQueue;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
+
+    public static final class Fig {
+        public int a;
+        public int w;
+        public int r;
+        public List<Integer> ids;
+    }
+
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
@@ -17,41 +25,37 @@ public class Main {
 
         int n = scanner.nextInt();
         final int w = scanner.nextInt();
-        PriorityQueue<int[]> heap = new PriorityQueue<>((l, r) -> {
-            if (l[0] == r[0] && l[1] == r[1]) {
-                return 0;
-            }
+        PriorityQueue<Fig> heap = new PriorityQueue<>(Comparator.comparingInt(f -> f.r));
 
-            boolean isIntersect = Math.abs(l[0] - r[0]) < Math.min(l[1], r[1]);
-            if (isIntersect) {
-                return Integer.compare(l[1], r[1]);
-            } else {
-                return 0;
-            }
-        });
-
+        List<Fig> figs = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            heap.add(new int[]{scanner.nextInt(), scanner.nextInt(), i});
+            Fig fig = new Fig();
+            fig.a = scanner.nextInt();
+            fig.w = scanner.nextInt();
+            fig.r = fig.a + fig.w - 1;
+            fig.ids = new ArrayList<>();
+            fig.ids.add(i);
+            figs.add(fig);
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        int layers = 1;
-        int[] prev = null;
-        while (!heap.isEmpty()) {
-            int[] r = heap.poll();
-            boolean isIntersect = prev != null && Math.abs(prev[0] - r[0]) < Math.min(prev[1], r[1]);
-            if (isIntersect) {
-                layers++;
-                prev =null;
+        figs.sort(Comparator.comparingInt(f -> f.a));
+        heap.add(figs.getFirst());
+
+        for (int i = 1; i < figs.size(); i++) {
+            Fig v = heap.peek();
+            if (figs.get(i).a > v.r) {
+                Fig f = figs.get(i);
+                Fig s = heap.poll();
+                s.ids.addAll(f.ids);
+                s.r = f.r;
+                heap.add(s);
             } else {
-                prev = r;
+                heap.add(figs.get(i));
             }
-
-            stringBuilder.append(r[2] + 1).append(' ');
         }
 
-        System.out.println(layers);
-        System.out.println(stringBuilder);
+        System.out.println(heap.size());
+        System.out.println(heap.stream().flatMap(f -> f.ids.stream()).map(i -> (i + 1) + "").collect(Collectors.joining(" ")));
 
         reader.close();
         writer.close();

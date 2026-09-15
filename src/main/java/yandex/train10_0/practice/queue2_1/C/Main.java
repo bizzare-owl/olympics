@@ -6,73 +6,78 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 public class Main {
+
+    public static final class Rover {
+        int from;
+        int time;
+        int id;
+        int pass;
+    }
+
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
 
         Scanner scanner = new Scanner(reader);
         int n = scanner.nextInt();
+        int from = scanner.nextInt() - 1;
+        int to = scanner.nextInt() - 1;
 
-        int[] rovers = new int[n];
-        Comparator<int[]> cmp = (r1, r2) -> Comparator.<Integer>naturalOrder().compare(r1[2], r2[2]);
-        @SuppressWarnings("unchecked")
-        Queue<int[]>[] cross = new PriorityQueue[]{new PriorityQueue<>(cmp), new PriorityQueue<>(cmp), new PriorityQueue<>(cmp), new PriorityQueue<>(cmp)};
 
-        int mainDirectionFrom = scanner.nextInt() - 1;
-        int mainDirectionTo = scanner.nextInt() - 1;
-
-        for (int i = 0; i < n; i++) {
-            int direction = scanner.nextInt() - 1;
-            int time = scanner.nextInt();
-            cross[direction].add(new int[]{i, direction, time});
+        List<List<Rover>> rovers = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            rovers.add(new ArrayList<>());
         }
 
-        int time = 1;
-        int crosseed = 0;
-        while (crosseed != n) {
-            final int currentTime = time;
-            List<int[]> roversToCross = Arrays.stream(cross).map(Queue::peek).filter(Objects::nonNull).filter(r -> r[2] <= currentTime).toList();
-            Predicate<Integer> isOnMainRoad = r -> r == mainDirectionFrom || r == mainDirectionTo;
-            Function<int[], Integer> getIndexOfRightRoad = r -> (r[1] + 3) % 4;
-            boolean isMainRoadOccupied = roversToCross.stream().anyMatch(r -> isOnMainRoad.test(r[1]));
+        for (int i = 0; i < n; i++) {
+            Rover rover = new Rover();
+            rover.from = scanner.nextInt() - 1;
+            rover.time = scanner.nextInt();
+            rover.id = i;
+            rovers.get(rover.from).add(rover);
+        }
 
-            Predicate<int[]> isObstacleFromTheRight = r -> {
-                int indexOfRightRoad = getIndexOfRightRoad.apply(r);
-                return !cross[indexOfRightRoad].isEmpty() && Objects.requireNonNull(cross[indexOfRightRoad].peek())[2] <= currentTime;
-            };
+        rovers.forEach(l -> l.sort(Comparator.comparingInt(r -> r.time)));
+        List<Queue<Rover>> roversQueue = rovers.stream().map(l -> (Queue<Rover>) new LinkedList<>(l)).toList();
 
-            Stream<int[]> roversOnMainRoad = roversToCross.stream();
+        List<Rover> passed = new ArrayList<>();
+        int t = 1;
+        while (passed.size() < n) {
+            int currentTime = t;
+            List<Rover> toPass = Stream.of(roversQueue.get(0).peek(), roversQueue.get(1).peek(), roversQueue.get(2).peek(), roversQueue.get(3).peek())
+                    .filter(Objects::nonNull)
+                    .filter(r -> r.time <= currentTime)
+                    .filter(r -> {
+                        int right = (r.from + 3) % 4;
+                        if (r.from == from || r.from == to) {
+                            if ((right == from || right == to) && roversQueue.get(right).peek() != null && roversQueue.get(right).peek().time <= currentTime) {
+                                return false;
+                            }
+                        } else {
+                            boolean isMainRoadOccupied = !roversQueue.get(from).isEmpty() && roversQueue.get(from).peek().time <= currentTime ||
+                                    !roversQueue.get(to).isEmpty() && roversQueue.get(to).peek().time <= currentTime;
+                            if (roversQueue.get(right).peek() != null && roversQueue.get(right).peek().time <= currentTime || isMainRoadOccupied) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }).toList();
 
-            if (isMainRoadOccupied) {
-                roversOnMainRoad = roversOnMainRoad.filter(r -> isOnMainRoad.test(r[1]));
-            }
-
-            if (isMainRoadOccupied && (mainDirectionTo - mainDirectionFrom == 1 || mainDirectionTo - mainDirectionFrom == 3)) {
-                roversOnMainRoad = roversOnMainRoad.filter(r -> !(isObstacleFromTheRight.test(r) && isOnMainRoad.test(getIndexOfRightRoad.apply(r))));
-            }
-
-            if (!isMainRoadOccupied) {
-                roversOnMainRoad = roversOnMainRoad.filter(r -> !isObstacleFromTheRight.test(r));
-            }
-
-            List<int[]> toCross = roversOnMainRoad.toList();
-            toCross.forEach(r -> {
-                rovers[r[0]] = currentTime;
-                cross[r[1]].poll();
+            toPass.forEach(r -> {
+                r.pass = currentTime;
+                passed.add(r);
+                roversQueue.get(r.from).poll();
             });
 
-            crosseed += toCross.size();
-            time++;
+
+            t++;
         }
 
-        for (int i = 0; i < n; i++) {
-            System.out.println(rovers[i]);
-        }
+        passed.stream().sorted(Comparator.comparingInt(r -> r.id)).mapToInt(r -> r.pass).forEach(System.out::println);
 
         reader.close();
         writer.close();
