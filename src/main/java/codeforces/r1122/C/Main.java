@@ -73,6 +73,6 @@ public class Main {
     }
 
     public static int solutionOr(int[] array, int index) {
-
+        return 0;
     }
 }
