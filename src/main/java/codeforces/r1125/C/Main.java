@@ -21,26 +21,19 @@ public class Main {
             a[i] = sc.nextInt();
         }
 
-        long result = 0;
-        for (int ss = 0; ss < 6; ss++) {
-            Map<Integer, Integer> map = new HashMap<>();
-            for (int i = ss; i < n - 5; i += 6) {
-                int f = a[i] + a[i + 2] - a[i + 4];
-                int s = a[i + 1] + a[i + 3] - a[i + 5];
-
-                map.put(f, map.getOrDefault(f, 0) + 1);
-                map.put(s, map.getOrDefault(s, 0) + 1);
-
-                if (ss == 5) {
-                    int p = a[0] + a[2] - a[4];
-                    map.put(p, map.getOrDefault(p, 0) + 1);
-                }
-
-                out.print(f + " " + s + "\n");
-            }
-
-            result += map.values().stream().filter(integer -> integer > 1).mapToInt(m -> (m * (m - 1) / 2)).sum();
+        Map<Integer, Integer> map = new HashMap<>();
+        int[] v = new int[n - 4];
+        for (int i = 0; i < n - 4; i++) {
+            v[i] = a[i] + a[i + 2] - a[i + 4]; // вычисляется результат для трезвучия
+            map.put(v[i], map.getOrDefault(v[i], 0) + 1); // подсчитывается количество одинаковых значений трезвучий
         }
+
+        long result = map.values().stream().mapToLong(x -> (long) x * (x - 1) / 2).sum(); // вычисляем количество пар
+        for (int i = 0; i < n - 4; i++) {
+            if (i + 2 < n - 4 && v[i] == v[i + 2]) result--;
+            if (i + 4 < n - 4 && v[i] == v[i + 4]) result--;
+        }
+
         out.println(result);
     }
 
