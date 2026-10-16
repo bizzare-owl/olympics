@@ -27,10 +27,6 @@ public class Main {
         }
     }
 
-    public static void countSort(Pair<Character, Integer>[] initial) {
-        // TODO: count sort
-    }
-
     public static void radixSort(Pair<Pair<Integer, Integer>, Integer>[] pairs) {
         @SuppressWarnings("unchecked")
         List<Pair<Pair<Integer, Integer>, Integer>>[] buckets = new ArrayList[pairs.length];
@@ -82,7 +78,7 @@ public class Main {
             initial[i] = new Pair<>(s.charAt(i), i);
         }
 
-        countSort(initial);
+        Arrays.sort(initial);
         suffixArray[0] = initial[0].second;
         classes[initial[0].second] = 0;
         for (int i = 1; i < classes.length; i++) {
@@ -100,8 +96,7 @@ public class Main {
             @SuppressWarnings("unchecked")
             Pair<Pair<Integer, Integer>, Integer>[] pairs = new Pair[s.length()];
             for (int i = 0; i < s.length(); i++) {
-                int leftHalf = (suffixArray[i] - (1 << k) + s.length()) % s.length();
-                pairs[i] = new Pair<>(new Pair<>(classes[leftHalf], classes[suffixArray[i]]), leftHalf);
+                pairs[i] = new Pair<>(new Pair<>(classes[(suffixArray[i] - (1 << k) + s.length()) % s.length()], classes[suffixArray[i]]), (suffixArray[i] - (1 << k) + s.length()) % s.length());
             }
 
             radixSort(pairs);
