@@ -54,18 +54,14 @@ public class Main {
             a[i] = Long.parseLong(nums[i]);
         }
 
-        long max = Long.MIN_VALUE;
-        long[] b = psa(a);
-        for (int i = 1; i <= n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                long v = b[j] - b[i - 1];
-                if (max < v) {
-                    max = v;
-                }
-            }
+        long maxSum = a[0];
+        long result = a[0];
+        for (int i = 1; i < n; i++) {
+            maxSum = Math.max(maxSum + a[i], a[i]);
+            result = Math.max(result, maxSum);
         }
 
-        println(max);
+        println(result);
 
     }
 
