@@ -2,52 +2,58 @@ package template;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.StringTokenizer;
 
 public class Main {
 
-    public static BufferedReader rin = new BufferedReader(new InputStreamReader(System.in));
+    public record Pair<F, S>(F first, S second) {}
 
-    public static void print(Object object) {
-        System.out.print(object);
-    }
+    public static final class FastReader {
+        private final BufferedReader inputStream;
 
-    public static void println(Object object) {
-        System.out.print(object + "\n");
-    }
+        private StringTokenizer stringTokenizer = null;
 
-    public static long[] psa(long[] a) {
-        long[] b = new long[a.length + 1];
-
-        for (int i = 1; i < b.length; i++) {
-            b[i] = b[i - 1] + a[i - 1];
+        public FastReader(final InputStream inputStream) {
+            this.inputStream = new BufferedReader(new InputStreamReader(inputStream));
         }
 
-        return b;
-    }
 
-    public static long[] da(long[] a) {
-        if (a.length == 0) {
-            return new long[] {};
+        public String next() {
+            if (stringTokenizer == null || !stringTokenizer.hasMoreTokens()) {
+                try {
+                    stringTokenizer = new StringTokenizer(inputStream.readLine());
+                } catch (IOException e) {
+                    throw new RuntimeException(e); // just rethrow it with unchecked exception
+                }
+            }
+
+            return stringTokenizer.nextToken();
         }
 
-        long[] d = new long[a.length];
-        d[0] = a[0];
-        for (int i = 1; i < a.length; i++) {
-            d[i] = a[i] - a[i - 1];
+        public int nextInt() {
+            return Integer.parseInt(next());
         }
-        d[a.length - 1] = a[a.length - 1];
 
-        return d;
+        public long nextLong() {
+            return Long.parseLong(next());
+        }
+
+        public double nextDouble() {
+            return Double.parseDouble(next());
+        }
+
     }
+
+    public static final FastReader fr = new FastReader(System.in);
 
     public static void solution() throws IOException {
-
+        // solution
     }
 
     public static void main(String[] args) throws IOException {
-        int t = Integer.parseInt(rin.readLine());
+        int t = fr.nextInt();
         for (int i = 0; i < t; i++) {
             solution();
         }
