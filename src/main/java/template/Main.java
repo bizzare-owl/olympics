@@ -1,9 +1,6 @@
 package template;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -17,6 +14,10 @@ public class Main {
 
         public FastReader(final InputStream inputStream) {
             this.inputStream = new BufferedReader(new InputStreamReader(inputStream));
+        }
+
+        public FastReader(final Reader reader) {
+            this.inputStream = new BufferedReader(reader);
         }
 
 
